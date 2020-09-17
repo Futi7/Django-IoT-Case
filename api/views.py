@@ -147,8 +147,13 @@ def device_status_percentage(request, device_id):
     # Calculate the time interval between prompted dates
     time_interval = round((end_date - start_date).total_seconds() / 60.0, 2)
 
-    device_logs = Log.objects.filter(time_stamp__gte=start_date, time_stamp__lte=end_date, device=device_id).order_by(
-        'time_stamp')
+    try:
+        device_logs = Log.objects.filter(time_stamp__gte=start_date, time_stamp__lte=end_date, device=device_id).order_by(
+            'time_stamp')
+    except Device.DoesNotExist:
+        return Response({"status": 404, "details": "Invalid device."},
+                        status=status.HTTP_404_NOT_FOUND)
+
 
     if device_logs.exists():
         """
