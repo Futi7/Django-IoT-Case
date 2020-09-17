@@ -131,11 +131,14 @@ def device_status_percentage(request, device_id):
     """
     status_control is to check if last log data's status whether online or offline
     offline_time variable is for calculating the total offline time
-    PRECISION variable determines the float precision.
+    timeline dictionary is for keeping the records of logs
+    PRECISION constant determines the float precision.
     """
     status_control = 'ONLINE'
     offline_time = 0
+    timeline = dict()
     PRECISION = 2
+
 
     # Get post data from request then assign them
     start_date = datetime.strptime(request.data['start_date'], "%Y-%m-%d %H:%M")
@@ -147,39 +150,50 @@ def device_status_percentage(request, device_id):
     device_logs = Log.objects.filter(time_stamp__gte=start_date, time_stamp__lte=end_date, device=device_id).order_by(
         'time_stamp')
 
-    """
-    Timeline dictionary is for keeping the records of logs
-    In the below loop we are calculating the total offline time
-    and record logs
-    """
-    timeline = dict()
-    temp_online_time = start_date
-    for log in device_logs:
-        if log.status == 'ONLINE':
-            offline_time += (log.time_stamp - start_date).total_seconds() / 60.0
-            temp_online_time = log.time_stamp
-            status_control = 'ONLINE'
-            timeline.update({("(%.19s)-(%.19s)" % (start_date, log.time_stamp)): log.status})
+    if device_logs.exists():
+        """
+        In the below loop we are calculating the total offline time
+        and record logs
+        """
+        temp_online_time = start_date
+        for log in device_logs:
+            if log.status == 'ONLINE':
+                offline_time += (log.time_stamp - start_date).total_seconds() / 60.0
+                temp_online_time = log.time_stamp
+                status_control = 'ONLINE'
+                timeline.update({("(%.19s)-(%.19s)" % (start_date, log.time_stamp)): log.status})
+
+            else:
+                timeline.update({("(%.19s)-(%.19s)" % (temp_online_time, log.time_stamp)): log.status})
+                start_date = log.time_stamp
+                status_control = 'OFFLINE'
+
+        """
+        Check the last log status to add timeline
+        Calculate the time interval between end date and last log if its offline
+        The algorithm calculates offline time percentage then get online time percentage from it
+        """
+        if status_control == 'OFFLINE':
+            timeline.update({("(%.19s)-(%.19s)" % (start_date, end_date)): "OFFLINE"})
+            offline_time += ((end_date - start_date).total_seconds() / 60.0)
 
         else:
-            timeline.update({("(%.19s)-(%.19s)" % (temp_online_time, log.time_stamp)): log.status})
-            start_date = log.time_stamp
-            status_control = 'OFFLINE'
+            timeline.update({("(%.19s)-(%.19s)" % (temp_online_time, end_date)): "ONLINE"})
 
-    """
-    Check the last log status to add timeline
-    Calculate the time interval between end date and last log if its offline
-    The algorithm calculates offline time percentage then get online time percentage from it
-    """
-    if status_control == 'OFFLINE':
-        timeline.update({("(%.19s)-(%.19s)" % (start_date, end_date)): "OFFLINE"})
-        offline_time += ((end_date - start_date).total_seconds() / 60.0)
+        offline_percentage = round((offline_time / time_interval) * 100, PRECISION)
+        online_percentage = round(100 - offline_percentage, PRECISION)
 
+    # If there is no record check devices current state then return that value
     else:
-        timeline.update({("(%.19s)-(%.19s)" % (temp_online_time, end_date)): "ONLINE"})
-
-    offline_percentage = round((offline_time / time_interval) * 100, PRECISION)
-    online_percentage = round(100 - offline_percentage, PRECISION)
+        device = Device.objects.get(pk=device_id)
+        if device.status == "OFFLINE":
+            timeline.update({("(%.19s)-(%.19s)" % (start_date, end_date)): "OFFLINE"})
+            offline_percentage = 100.0
+            online_percentage = 0.0
+        else:
+            timeline.update({("(%.19s)-(%.19s)" % (start_date, end_date)): "ONLINE"})
+            offline_percentage = 0.0
+            online_percentage = 100.0
 
     return Response({
         'timeline': timeline,
