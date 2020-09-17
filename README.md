@@ -22,11 +22,11 @@ For installing Python on Mac OS X:
 
 Run below code in project directory from shell.
 ```
-	pip instal -r requirements.txt
+	pip install -r requirements.txt
 ```
 For those who has multiple python version i recommend you to use:
 ```
-	pip3 instal -r requirements.txt
+	pip3 install -r requirements.txt
 ```
 ## Structure
 Visit /api/ for API structure
