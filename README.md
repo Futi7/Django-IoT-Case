@@ -1,4 +1,4 @@
-# SIMPLE CRUD API WITH DJANGO REST FRAMEWORK
+# SIMPLE DEVICE MANAGEMENT API WITH DJANGO REST FRAMEWORK
 This API aims to add and manage devices and get log informations.
 ## Requirements
 - Python 3.7
