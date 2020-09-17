@@ -9,7 +9,6 @@ class Device(models.Model):
     status = models.CharField(max_length=10, default="OFFLINE", choices=STATUS)
 
 
-
 class Log(models.Model):
     status = models.CharField(max_length=10)
     time_stamp = models.DateTimeField(auto_now_add=True)

@@ -10,7 +10,7 @@ class DeviceListAdmin(admin.ModelAdmin):
 
 class LogListAdmin(admin.ModelAdmin):
     list_display = ['time_stamp', 'device_id', 'status']
-    list_filter = ['time_stamp', 'device_id', 'status']
+    list_filter = ['device_id', 'status']
 
 
 admin.site.register(Device, DeviceListAdmin)
