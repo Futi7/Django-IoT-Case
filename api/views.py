@@ -31,7 +31,7 @@ def api_doc(request):
             'JSON Body Format': 'None'
         },
         'Details': {
-            'URL': '/device_detail/<int:id>/',
+            'URL': '/device_detail/<int:device_id>/',
             'Description': 'Show the device info',
             'Allowed Methods': '[GET]',
             'Authentication': 'Required',
