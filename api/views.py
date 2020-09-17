@@ -128,6 +128,12 @@ def device_status_update(request, device_id):
 @authentication_classes([SessionAuthentication, BasicAuthentication])
 @permission_classes([IsAdminUser])
 def device_status_percentage(request, device_id):
+    try:
+        Device.objects.get(pk=device_id)
+    except Device.DoesNotExist:
+        return Response({"status": 404, "details": "Invalid device."},
+                        status=status.HTTP_404_NOT_FOUND)
+
     """
     status_control is to check if last log data's status whether online or offline
     offline_time variable is for calculating the total offline time
