@@ -152,14 +152,8 @@ def device_status_percentage(request, device_id):
 
     # Calculate the time interval between prompted dates
     time_interval = round((end_date - start_date).total_seconds() / 60.0, 2)
-
-    try:
-        device_logs = Log.objects.filter(time_stamp__gte=start_date, time_stamp__lte=end_date, device=device_id).order_by(
-            'time_stamp')
-    except Device.DoesNotExist:
-        return Response({"status": 404, "details": "Invalid device."},
-                        status=status.HTTP_404_NOT_FOUND)
-
+    device_logs = Log.objects.filter(time_stamp__gte=start_date, time_stamp__lte=end_date, device=device_id).order_by(
+        'time_stamp')
 
     if device_logs.exists():
         """
@@ -172,10 +166,10 @@ def device_status_percentage(request, device_id):
                 offline_time += (log.time_stamp - start_date).total_seconds() / 60.0
                 temp_online_time = log.time_stamp
                 status_control = 'ONLINE'
-                timeline.update({("(%.19s)-(%.19s)" % (start_date, log.time_stamp)): log.status})
+                timeline.update({("(%.19s)-(%.19s)" % (start_date, log.time_stamp)): "OFFLINE"})
 
             else:
-                timeline.update({("(%.19s)-(%.19s)" % (temp_online_time, log.time_stamp)): log.status})
+                timeline.update({("(%.19s)-(%.19s)" % (temp_online_time, log.time_stamp)): "ONLINE"})
                 start_date = log.time_stamp
                 status_control = 'OFFLINE'
 
@@ -196,15 +190,13 @@ def device_status_percentage(request, device_id):
 
     # If there is no record check devices current state then return that value
     else:
-        device = Device.objects.get(pk=device_id)
-        if device.status == "OFFLINE":
-            timeline.update({("(%.19s)-(%.19s)" % (start_date, end_date)): "OFFLINE"})
-            offline_percentage = 100.0
-            online_percentage = 0.0
-        else:
-            timeline.update({("(%.19s)-(%.19s)" % (start_date, end_date)): "ONLINE"})
-            offline_percentage = 0.0
-            online_percentage = 100.0
+        return Response({
+            'timeline': "There is no record between given dates.",
+            'report': {
+                'ONLINE': '%0',
+                'OFFLINE': '%100 DEFAULT',
+            }
+        })
 
     return Response({
         'timeline': timeline,
