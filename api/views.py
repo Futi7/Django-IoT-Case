@@ -172,11 +172,11 @@ def device_status_percentage(request, device_id):
     The algorithm calculates offline time percentage then get online time percentage from it
     """
     if status_control == 'OFFLINE':
-        timeline.update({("(%.19s)-(%.19s)" % (start_date, end_date)): "ONLINE"})
+        timeline.update({("(%.19s)-(%.19s)" % (start_date, end_date)): "OFFLINE"})
         offline_time += ((end_date - start_date).total_seconds() / 60.0)
 
     else:
-        timeline.update({("(%.19s)-(%.19s)" % (temp_online_time, end_date)): "OFFLINE"})
+        timeline.update({("(%.19s)-(%.19s)" % (temp_online_time, end_date)): "ONLINE"})
 
     offline_percentage = round((offline_time / time_interval) * 100, PRECISION)
     online_percentage = round(100 - offline_percentage, PRECISION)
