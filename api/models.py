@@ -13,3 +13,10 @@ class Log(models.Model):
     status = models.CharField(max_length=10)
     time_stamp = models.DateTimeField(auto_now_add=True)
     device = models.ForeignKey(Device, on_delete=models.CASCADE)
+
+    def as_json(self):
+        return dict(
+            time_stamp=self.time_stamp,
+            status=self.status,
+        )
+
