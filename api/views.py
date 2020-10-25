@@ -17,6 +17,8 @@ from .models import Device, Log
 from .serializers import DeviceSerializer
 
 
+renderer_classes = [renderers.JSONRenderer]
+
 @api_view(['GET'])
 def api_doc(request):
     """
