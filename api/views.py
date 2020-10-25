@@ -15,6 +15,7 @@ from rest_framework.permissions import IsAdminUser
 
 from .models import Device, Log
 from .serializers import DeviceSerializer
+from django.settings import renderers
 
 
 renderer_classes = [renderers.JSONRenderer]
